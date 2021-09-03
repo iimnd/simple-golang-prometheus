@@ -21,7 +21,7 @@ var (
 			Name:      "my_counter",
 			Help:      "This is my counter",
 		},
-		[]string{"code", "method", "path"},
+		[]string{"code", "method", "path", "version"},
 		)
 		
 
@@ -38,7 +38,7 @@ var (
 				Name:      "my_gauge",
 				Help:      "This is my counter",
 			},
-			[]string{"code", "method", "path"},
+			[]string{"code", "method", "path", "version"},
 			)
 
 	histogram = prometheus.NewHistogram(
@@ -56,7 +56,7 @@ var (
 			// ConstLabels: prometheus.Labels{"service": name},
 			Buckets:     buckets,
 		},
-			[]string{"code", "method", "path"},
+			[]string{"code", "method", "path", "version"},
 		)
 
 	summary = prometheus.NewSummary(
@@ -95,8 +95,8 @@ func main() {
 }
 
 //fungsi dummy, counter
-func functionCounter(code string, method string, func_name string) {
-	counter.WithLabelValues(code, method, func_name).Add(1)
+func functionCounter(code string, method string, func_name string, version string) {
+	counter.WithLabelValues(code, method, func_name, version).Add(1)
 
 }
 
@@ -111,30 +111,30 @@ func timeTrack(start time.Time, sleeptime int) (int64) {
 func get_trx(c echo.Context) error {
 
 	//add counter
-	functionCounter("200", "GET", "get_trx")
+	functionCounter("200", "GET", "get_trx", "v.1.0.0")
 	
 
 	//add histogram
 	elapsed_time  := timeTrack(time.Now(),rand.Intn(5))
-	histogramvec.WithLabelValues("200", "GET", "get_report").Observe(float64(elapsed_time) / 1000000) //milisecons
+	histogramvec.WithLabelValues("200", "GET", "get_report", "v.1.0.0").Observe(float64(elapsed_time) / 1000000) //milisecons
 
 
 	//add gauge
-	gaugevec.WithLabelValues("200", "GET", "get_report").Add(rand.Float64()*15 - 5) 
+	gaugevec.WithLabelValues("200", "GET", "get_report", "v.1.0.0").Add(rand.Float64()*15 - 5) 
 
     return c.String(http.StatusOK, strconv.FormatInt(int64(elapsed_time) / 1000000, 10)+ "ms")
 }
 
 func get_report(c echo.Context) error {
 	//add counter
-	functionCounter("200", "GET", "get_report")
+	functionCounter("200", "GET", "get_report","v.1.0.0")
 
 	//add histogram
 	elapsed_time  := timeTrack(time.Now(),rand.Intn(5))
-	histogramvec.WithLabelValues("200", "GET", "get_trx").Observe(float64(elapsed_time) / 1000000) //milisecons
+	histogramvec.WithLabelValues("200", "GET", "get_trx", "v.1.0.0").Observe(float64(elapsed_time) / 1000000) //milisecons
 
 	// add gauge
-	gaugevec.WithLabelValues("200", "GET", "get_trx").Add(rand.Float64()*15 - 5) 
+	gaugevec.WithLabelValues("200", "GET", "get_trx", "v.1.0.0").Add(rand.Float64()*15 - 5) 
 	
 	return c.String(http.StatusOK, "nice "+ strconv.FormatInt(int64(elapsed_time) / 1000000, 10)+ "ms")
 }
